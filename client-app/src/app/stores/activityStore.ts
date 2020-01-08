@@ -13,9 +13,21 @@ class ActivityStore {
   @observable target = "";
 
   @computed get activitiesByDate() {
-    return Array.from(this.activityRegistry.values()).sort(
+
+    return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()))
+  }
+
+  groupActivitiesByDate(activities: IActivity[]) {
+    const sortedActivities = activities.sort(
       (a, b) => Date.parse(a.date) - Date.parse(b.date)
     );
+    //return sortedActivities;
+    //return Object.entries(sortedActivities);
+    return Object.entries(sortedActivities.reduce((activities, activity) => {
+        const date = activity.date.split('T')[0];
+        activities[date] = activities[date] ? [...activities[date], activity] : [activity];
+        return activities;
+    }, {} as {[key: string]: IActivity[]}));
   }
 
   @action loadActivities = async () => {
@@ -29,6 +41,7 @@ class ActivityStore {
         });
         this.loadingInitial = false;
       });
+      console.log(this.groupActivitiesByDate(activities));
     } catch (error) {
       runInAction("loading activities error", () => {
         this.loadingInitial = false;
@@ -43,17 +56,16 @@ class ActivityStore {
       this.activity = activity;
     } else {
       this.loadingInitial = true;
-      try{
+      try {
         activity = await agent.Activities.details(id);
-        runInAction('getting activity', () => {
+        runInAction("getting activity", () => {
           this.activity = activity;
           this.loadingInitial = false;
-
-        })
-      } catch (error){
-        runInAction('get activity error', () => {
+        });
+      } catch (error) {
+        runInAction("get activity error", () => {
           this.loadingInitial = false;
-        })
+        });
         console.log(error);
       }
     }
@@ -61,7 +73,7 @@ class ActivityStore {
 
   @action clearActivity = () => {
     this.activity = null;
-  }
+  };
 
   getActivity = (id: string) => {
     return this.activityRegistry.get(id);
@@ -123,8 +135,6 @@ class ActivityStore {
       console.log(error);
     }
   };
-
-
 }
 
 export default createContext(new ActivityStore());
