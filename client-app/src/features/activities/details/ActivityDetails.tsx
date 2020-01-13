@@ -4,7 +4,7 @@ import ActivityStore from "../../../app/stores/activityStore";
 import { observer } from "mobx-react-lite";
 import { RouteComponentProps } from "react-router-dom";
 import { LoadingComponent } from "../../../app/layout/LoadingComponent";
-import ActivityDetailedHeader  from "./ActivityDetailedHeader";
+import ActivityDetailedHeader from "./ActivityDetailedHeader";
 import { ActivityDetailedInfo } from "./ActivityDetailedInfo";
 import { ActivityDetailedSidebar } from "./ActivityDetailedSidebar";
 import { ActivityDetailedChat } from "./ActivityDetailedChat";
@@ -14,17 +14,20 @@ interface DetailParams {
 }
 
 const ActivityDetails: React.FC<RouteComponentProps<DetailParams>> = ({
-  match
+  match,
+  history
 }) => {
   const activityStore = useContext(ActivityStore);
   const { activity, loadActivity, loadingInitial } = activityStore;
 
   useEffect(() => {
     loadActivity(match.params.id);
-  }, [loadActivity, match.params.id]);
+  }, [loadActivity, match.params.id, history]);
 
-  if (loadingInitial || !activity)
+  if (loadingInitial)
     return <LoadingComponent content="Loading activity..." />;
+
+  if (!activity) return <h2>Activity Not Found</h2>;
 
   return (
     <Grid>

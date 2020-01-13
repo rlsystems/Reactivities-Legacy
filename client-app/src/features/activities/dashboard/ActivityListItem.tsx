@@ -11,7 +11,7 @@ export const ActivityListItem: React.FC<{ activity: IActivity }> = ({
       <Segment>
         <Item.Group>
         <Item>
-          <Item.Image size="tiny" curcular src="/assets/user.png" />
+          <Item.Image size="tiny" circular src="/assets/user.png" />
           <Item.Content>
             <Item.Header as="a">{activity.title}</Item.Header>
             <Item.Description>Hosted by</Item.Description>
