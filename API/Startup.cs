@@ -9,6 +9,16 @@ using MediatR;
 using Application.Activities;
 using FluentValidation.AspNetCore;
 using API.Middleware;
+using Domain;
+using Microsoft.AspNetCore.Identity;
+using Application.Interfaces;
+using Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API
 {
@@ -41,12 +51,41 @@ namespace API
             });
 
             services.AddMediatR(typeof(List.Handler).Assembly);
-            services.AddControllers()
-                .AddFluentValidation(cfg => {
-                    cfg.RegisterValidatorsFromAssemblyContaining<Create>();
-                });
+            services.AddMvc();
 
-            //services.AddControllers();
+            var builder = services.AddIdentityCore<AppUser>();
+            var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
+            identityBuilder.AddEntityFrameworkStores<DataContext>();
+            identityBuilder.AddSignInManager<SignInManager<AppUser>>();
+
+            services.AddControllers(opt =>
+            {
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            })
+              .AddFluentValidation(cfg =>
+               cfg.RegisterValidatorsFromAssemblyContaining<Create>())
+              .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+
+            
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opt =>
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateAudience = false,
+                    ValidateIssuer = false
+                };
+            });
+
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IUserAccessor, UserAccessor>();
 
         }
 
@@ -60,10 +99,12 @@ namespace API
                 //app.UseDeveloperExceptionPage();
             }
 
-            // app.UseHttpsRedirection();
-            app.UseCors("CorsPolicy");
-            app.UseRouting();
 
+            app.UseRouting();
+            app.UseCors("CorsPolicy");
+
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
