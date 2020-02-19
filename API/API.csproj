@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
   </ItemGroup>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <UserSecretsId>87b38e2b-149a-4c14-bf05-0d968d2f0afc</UserSecretsId>
   </PropertyGroup>
 </Project>
