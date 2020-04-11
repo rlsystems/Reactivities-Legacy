@@ -6,7 +6,7 @@ import { LoadingComponent } from "../../../app/layout/LoadingComponent";
 import ActivityDetailedHeader from "./ActivityDetailedHeader";
 import { ActivityDetailedInfo } from "./ActivityDetailedInfo";
 import ActivityDetailedSidebar  from "./ActivityDetailedSidebar";
-import { ActivityDetailedChat } from "./ActivityDetailedChat";
+import ActivityDetailedChat  from "./ActivityDetailedChat";
 import { RootStoreContext } from "../../../app/stores/rootStore";
 
 interface DetailParams {
